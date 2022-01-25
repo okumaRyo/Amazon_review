@@ -1,0 +1,84 @@
+\documentclass[a4paper,11pt,titlepage]{jsarticle} 
+\usepackage[dvipdfmx]{graphicx} 
+\usepackage{listings} 
+\usepackage{here}
+\usepackage{amsmath} 
+\usepackage{url}
+
+\title{タイトル}
+\author{195702D  奥間 涼\\195748B 徳里 光陽\\195761K 塩月 流星\\195769E 佐藤 和周\\195770J 栗原 瑠威}
+\date{\today}
+
+\begin{document}
+\maketitle
+\tableofcontents
+\clearpage
+\section{テーマ}
+　最近、オンラインショップを活用する人々が増えている。その一方でサクラレビューによって購入者が求めている商品が届かないケースが増えている。
+
+購入者が求めている商品が届かないということは、購入者の金銭や時間の損失だけではなく質の悪い商品が出回ることで社会に悪影響を与えることが考えられる。
+
+特に有名なオンラインショッピングサイトであるAmazonに着目し、その中から良くない商品、サクラレビューを中心にサクラ判定を行っていこうと考えた。
+
+よって本グループでは『Amazonレビューのサクラ判定』というテーマを設定しそれを元に実験を行った。
+
+\section{目的}
+今回の実験を通して、サクラレビューの特徴を獲得し実際のレビューに適用できるモデルを作成する。
+
+\section{目標}
+サクラレビューの認識率70\%以上のモデルを作成する。
+
+\section{アプローチの全体像}
+
+\section{予定していた実験計画}
+
+\section{データセットの構築方法}
+Amazonの商品ページの中からサクラレビューの含まれていそうなURLを収集し，サクラチェッカーで判定する。サクラが多いと判断された商品と健全なレビューと判断された商品をデータセットの作成した。
+
+データの取得にはBeautifulSoup4(以下bs4)とseleniumを用いた。
+
+bs4の機能を用いることで以下の用にタグからデータを取得した。
+
+\begin{itemize}
+\item .product-title = 商品の名前
+\item .averageStarRating = 商品の平均評価
+\item .review-title-content = レビュータイトル
+\item .review-rating = レビュー評価
+\item .review-text = レビュー本文
+\end{itemize}
+
+収集した商品のレビューをサクラレビューかどうかを各メンバーが5段階評価を行い、平均をその商品の評価としてデータを作成する。
+
+BERTとspaCyを使用してレビュー文をベクトル化した。
+
+\section{機械学習の進め方}
+(a)どの学習器を使ったのか。\\
+RandomForest
+
+(b)パラメータはどのように調整したのか。\\
+デフォルト値
+\section{実験}
+\subsection{実験設計}
+
+\subsection{実験結果}
+
+\section{考察}
+
+\section{自己評価や振り返り}
+
+\section{時間の都合上省いた項目}
+
+
+
+\begin{thebibliography}{9}
+\bibitem{ki}ジコログ, 初心者でも簡単にできるSeleniumのインストール[Python]\\
+ \url{https://self-development.info/初心者でも簡単にできるseleniumのインストール【python】/}, \\参照2021-10-26.
+ \bibitem{C4.5}sakura-checker, サクラチェッカー,\\
+ \url{https://sakura-checker.jp}, \\参照2021-11-09.
+  \bibitem{word2vec}Kazuyoshi Sato, Word2Vec+RandomForestで笑点の回答者ともらえる座布団の枚数を予測する,\\
+ \url{https://qiita.com/WhitePepperKS/items/ef9ab61bd921a5fb7085}, \\参照2021-12-14.
+\bibitem{bert}ENOKI - AIを活用した無人チャットボットのプラットフォームを提供, BERTを使用した文章ベクトル作成,\\
+ \url{https://www.enoki.enoki-inc.co.jp/tech-6/}, \\参照2021-12-21.
+
+\end{thebibliography}
+\end{document}
