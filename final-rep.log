@@ -1,4 +1,4 @@
-This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.11)  18 JAN 2022 17:18
+This is e-pTeX, Version 3.141592653-p3.9.0-210218-2.6 (utf8.euc) (TeX Live 2021) (preloaded format=platex 2021.7.11)  1 FEB 2022 18:33
 entering extended mode
  restricted \write18 enabled.
  file:line:error style messages enabled.
@@ -237,18 +237,24 @@ LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
  [1] [2
 
 ]
+LaTeX Font Info:    Font shape `JT1/mc/m/n' will be
+(Font)              scaled to size 8.64899pt on input line 58.
+LaTeX Font Info:    Font shape `JY1/mc/m/n' will be
+(Font)              scaled to size 8.64899pt on input line 58.
+ [3]
 LaTeX Font Info:    Font shape `JT1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 61.
+(Font)              scaled to size 11.53198pt on input line 121.
 LaTeX Font Info:    Font shape `JY1/gt/m/n' will be
-(Font)              scaled to size 11.53198pt on input line 61.
- [3] [4] (./final-rep.aux) ) 
+(Font)              scaled to size 11.53198pt on input line 121.
+ [4] [5] [6] [7] [8]
+(./final-rep.aux) ) 
 Here is how much of TeX's memory you used:
- 3167 strings out of 479466
- 43948 string characters out of 5870548
- 348565 words of memory out of 5000000
- 20861 multiletter control sequences out of 15000+600000
- 415708 words of font info for 84 fonts, out of 8000000 for 9000
+ 3190 strings out of 479466
+ 44128 string characters out of 5870548
+ 353709 words of memory out of 5000000
+ 20883 multiletter control sequences out of 15000+600000
+ 416288 words of font info for 87 fonts, out of 8000000 for 9000
  934 hyphenation exceptions out of 8191
- 68i,6n,74p,221b,296s stack positions out of 5000i,500n,10000p,200000b,80000s
+ 68i,8n,74p,480b,327s stack positions out of 5000i,500n,10000p,200000b,80000s
 
-Output written on final-rep.dvi (5 pages, 6852 bytes).
+Output written on final-rep.dvi (9 pages, 24900 bytes).

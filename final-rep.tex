@@ -5,7 +5,7 @@
 \usepackage{amsmath} 
 \usepackage{url}
 
-\title{タイトル}
+\title{エンジニアリングデザイン演習・G1\\アマゾンレビューのサクラ判定}
 \author{195702D  奥間 涼\\195748B 徳里 光陽\\195761K 塩月 流星\\195769E 佐藤 和周\\195770J 栗原 瑠威}
 \date{\today}
 
@@ -14,13 +14,12 @@
 \tableofcontents
 \clearpage
 \section{テーマ}
-　最近、オンラインショップを活用する人々が増えている。その一方でサクラレビューによって購入者が求めている商品が届かないケースが増えている。
+近年オンラインショップを活用する人々が増加している。一方でサクラレビューによって偽物、欠陥や欠品のある商品が良い商品として扱われ、その結果そのレビューを見た購入者へ本来求めている商品が届かないケースもあり、サイト運営社は対応に追われている\cite{5}。購入者が求めている商品が届かないということは、購入者の金銭や時間の損失だけではなく質の悪い商品が出回ることで社会に悪影響を与え得ることが考えられる。
 
-購入者が求めている商品が届かないということは、購入者の金銭や時間の損失だけではなく質の悪い商品が出回ることで社会に悪影響を与えることが考えられる。
-
-特に有名なオンラインショッピングサイトであるAmazonに着目し、その中から良くない商品、サクラレビューを中心にサクラ判定を行っていこうと考えた。
+特に有名なオンラインショッピングサイトであるAmazonに着目し、その中からサクラレビューを中心にサクラ判定を行っていこうと考えた。
 
 よって本グループでは『Amazonレビューのサクラ判定』というテーマを設定しそれを元に実験を行った。
+
 
 \section{目的}
 今回の実験を通して、サクラレビューの特徴を獲得し実際のレビューに適用できるモデルを作成する。
@@ -29,15 +28,19 @@
 サクラレビューの認識率70\%以上のモデルを作成する。
 
 \section{アプローチの全体像}
+スクレイピングによって集めたAmazonのレビューに5段階評価の教師ラベルを各自の評価で付与し、spaCy、BERTでベクトル化したデータセットを用いる(詳細は\ref{6}節データセットの構築方法)。
+
+作成したデータセットをRandomForestで学習し，spaCy，BERTでの認識率の違いを調べた。
 
 \section{予定していた実験計画}
+本実験では当初，amazonやサクラチェッカー\cite{3}のサイトを用いて，サクラレビューが多いと判断された商品のURLを取得し、スクレイピングでデータの収集を収集する。そして5段階評価のラベルをつけ、データセットを作成。spaCy、BERTによるベクトル化を用いて学習を行い、ハイパーパラメータを調整することで精度を上げるという流れを計画していた。しかし，5段階評価での分類では思うように精度が上がらないという問題に直面したため，5段階評価を3段階評価にしたパターンでの分類も行った。
 
-\section{データセットの構築方法}
-Amazonの商品ページの中からサクラレビューの含まれていそうなURLを収集し，サクラチェッカーで判定する。サクラが多いと判断された商品と健全なレビューと判断された商品をデータセットの作成した。
+\section{データセットの構築方法}\label{6}
+Amazonサイトからレビュー数が100以上ある商品のURLを探しサクラチェッカー\cite{3}で検索をかける。検索すると、レビューの内容やレビューが書き込まれた日付の偏り，評価の分布なども加味して，その商品がサクラ度(サクラレビューが多い可能性)が分かるため，サクラ度が高いと判定された商品のURLを集めた。
 
-データの取得にはBeautifulSoup4(以下bs4)とseleniumを用いた。
+BeautifulSoup4(以下bs4)とselenium\cite{6}を用いて、収集したURLからレビュー毎にcsvファイルへスクレイピング\cite{2}した。
 
-bs4の機能を用いることで以下の用にタグからデータを取得した。
+bs4の機能を用いることで以下の様にタグからデータを取得した。
 
 \begin{itemize}
 \item .product-title = 商品の名前
@@ -47,38 +50,306 @@ bs4の機能を用いることで以下の用にタグからデータを取得�
 \item .review-text = レビュー本文
 \end{itemize}
 
-収集した商品のレビューをサクラレビューかどうかを各メンバーが5段階評価を行い、平均をその商品の評価としてデータを作成する。
+サクラチェッカーは，全てのレビューや評価から商品が危険かどうかを判定するサイトなので，プログラムにより取得したデータセット(一つ一つのレビュー)はサクラかどうかのラベルが付与されていない状態である。そこでメンバー3名がレビューの内容を確認し、各々が5段階で評価してその平均値をラベルとして付与した。なお、ラベルは学習に用いる際にint型にキャストして用いた。
 
-BERTとspaCyを使用してレビュー文をベクトル化した。
+5段階評価の評価基準(1〜2:サクラ: 3: どちらとも言えない: 4〜5: 信頼できる):
+\begin{table}[H]
+	\centering
+	\caption{5段階評価基準}
+	\label{asses}
+	\begin{tabular}{|c|c|}
+		\hline
+		ラベル & レビュー内容\\
+		\hline
+		\hline
+		1 & 不自然な日本語で書かれていないか \\
+		\hline
+		2 & 未使用でレビューしている文(例:"まだ使っていないですが期待を込めて星5です") \\
+		\hline
+		3 & コピペ文のようなレビュー(例:"すごく良い"，"使いやすい"，"特になし"など) \\
+		\hline
+		4 & 商品についての説明，評価理由などが簡潔に書かれている \\
+		\hline
+		5 & 商品についての説明，評価理由などが詳細に書かれている \\
+		\hline
+	\end{tabular}
+\end{table}
+ラベル付されたデータをBERTとspaCyの2種類でベクトル化したものをデータセットとした。
+
+また，3値分類で使用する際，$1 〜 2.5 \Rightarrow 1: 2.5 〜 3.5 \Rightarrow 2: 3.5 〜 5 \Rightarrow 3$にラベルを再付与して分類する。下表\ref{sp3},\ref{ber3}にラベル毎のデータ数を示す。
+\begin{table}[H]
+	\centering
+	\caption{spaCyの3値分類で用いたデータセットの各ラベルの個数}
+	\label{sp3}
+	\begin{tabular}{|c|c|}
+		\hline
+		ラベル & データ数\\
+		\hline
+		\hline
+		1(サクラレビュー) & 32 \\
+		\hline
+		2 (どちらとも言えない) & 97 \\
+		\hline
+		3(信頼できるレビュー) & 379 \\
+		\hline
+	\end{tabular}
+\end{table}
+\begin{table}[H]
+	\centering
+	\caption{BERTの3値分類で用いたデータセットの各ラベルの個数}
+	\label{ber3}
+	\begin{tabular}{|c|c|}
+		\hline
+		ラベル & データ数\\
+		\hline
+		\hline
+		1(サクラレビュー) & 69 \\
+		\hline
+		2 (どちらとも言えない) & 97 \\
+		\hline
+		3(信頼できるレビュー) & 394 \\
+		\hline
+	\end{tabular}
+\end{table}
 
 \section{機械学習の進め方}
-(a)どの学習器を使ったのか。\\
-RandomForest
+まず、自分たちで作成したデータセットの文章の部分を比較用にspicyとbertでベクトル化をし、それをランダムフォレストを用いて学習を進めていく。BERTは、日本語Wikipediaで学習を進めたモデルを利用した\cite{7}。spaCyのベクトル化の際に用いた学習済みモデルはGiNZAの日本語モデル"ja-ginza"を用いた\cite{1}。https://megagonlabs.github.io/ginza/
 
-(b)パラメータはどのように調整したのか。\\
-デフォルト値
-\section{実験}
-\subsection{実験設計}
+\section{実験結果}
+学習を行なった結果をspaCyとBERTの場合で示す。
 
-\subsection{実験結果}
+\subsection{spaCy(サンプル数508個，ベクトル数508個)}
+\begin{table}[H]
+	\centering
+	\caption{テストデータと訓練データの割合によるモデルの精度の変化(5値分類)\\
+			train\_test\_split(random\_state=1),forest(max\_depth=None,random\_state=1)}
+	\label{sp5_size}
+	\begin{tabular}{|c|c|}
+		\hline
+		test\_size(割合) & 精度\\
+		\hline
+		\hline
+		0.3 & 0.5228 \\
+		\hline
+		0.4 & 0.5196 \\
+		\hline
+		0.5 & 0.5157 \\
+		\hline
+	\end{tabular}
+\end{table}
+
+ランダムフォレストの最大深さmax\_depthを変化した際にモデルの精度がどの程度変化するか調べた\cite{4}。その結果を表\ref{sp5_size}に示す。
+
+\begin{table}[H]
+	\centering
+	\caption{ランダムフォレストのハイパーパラメータ(深さの最大値)の変化に対するモデルの精度の変化(5値分類)\\
+train\_test\_split(test\_size=0.4, random\_state=1),forest(random\_state=1)}
+	\label{sp5_hp}
+	\begin{tabular}{|c|c|}
+		\hline
+		max\_depth & 精度\\
+		\hline
+		\hline
+		None(default) & 0.5229 \\
+		\hline
+		3 & 0.5294 \\
+		\hline
+		4 & 0.5098 \\
+		\hline
+		5 & 0.5294 \\
+		\hline
+		6 & 0.5228 \\
+		\hline
+	\end{tabular}
+\end{table}
+
+表\ref{sp5_size},\ref{sp5_hp}より、spacyを用いてベクトル化したデータセットを用いて学習を行なったが、思うような結果が得られなかった。そこで、教師ラベルを5個から3個に減らして再度学習を試みた。その結果を表\ref{sp3_size},\ref{sp3_hp}に示す。
+
+\begin{table}[H]
+	\centering
+	\caption{テストデータと訓練データの割合によるモデルの精度の変化(3値分類)\\
+			train\_test\_split(random\_state=1),forest(max\_depth=None,random\_state=1)}
+	\label{sp3_size}
+	\begin{tabular}{|c|c|}
+		\hline
+		test\_size(割合) & 精度\\
+		\hline
+		\hline
+		0.3 & 0.7516 \\
+		\hline
+		0.4 & 0.7647 \\
+		\hline
+		0.5 & 0.7519 \\
+		\hline
+	\end{tabular}
+\end{table}
+
+
+\begin{table}[H]
+	\centering
+	\caption{ランダムフォレストのハイパーパラメータ(深さの最大値)の変化に対するモデルの精度の変化(3値分類)\\
+train\_test\_split(test\_size=0.4, random\_state=1),forest(random\_state=1)}
+	\label{sp3_hp}
+	\begin{tabular}{|c|c|}
+		\hline
+		max\_depth & 精度\\
+		\hline
+		\hline
+		None(default) & 0.7647 \\
+		\hline
+		3 & 0.7549 \\
+		\hline
+		4 & 0.7500 \\
+		\hline
+		5 & 0.7647 \\
+		\hline
+		6 & 0.7402 \\
+		\hline
+	\end{tabular}
+\end{table}
+
+表\ref{sp5_size},\ref{sp5_hp},\ref{sp3_size},\ref{sp3_hp}より，5値分類より3値分類の方が精度が高かった。
+
+\subsection{BERT(サンプル数560個，ベクトル数560個)}
+＊修正前は、768と書いてあったが、確認してみたところ、同一のベクトルが誤って複数回書き込まれてしまっていたため、そのようになってしまっていた。確認のため、もう一度レビューの本文をベクトル化してみたところ、サンプル数とベクトル数の数は一致していた。
+
+\begin{table}[H]
+	\centering
+	\caption{テストデータと訓練データの割合によるモデルの精度の変化(5値分類)\\
+			train\_test\_split(random\_state=1),forest(max\_depth=None,random\_state=1)}
+	\label{ber5_size}
+	\begin{tabular}{|c|c|}
+		\hline
+		test\_size(割合) & 精度\\
+		\hline
+		\hline
+		0.3 & 0.5357 \\
+		\hline
+		0.4 & 0.5893 \\
+		\hline
+		0.5 & 0.5214 \\
+		\hline
+	\end{tabular}
+\end{table}
+
+
+\begin{table}[H]
+	\centering
+	\caption{ランダムフォレストのハイパーパラメータ(深さの最大値)の変化に対するモデルの精度の変化(5値分類)\\
+train\_test\_split(test\_size=0.4, random\_state=1),forest(random\_state=1)}
+	\label{ber5_hp}
+	\begin{tabular}{|c|c|}
+		\hline
+		max\_depth & 精度\\
+		\hline
+		\hline
+		None(default) & 0.5893 \\
+		\hline
+		3 & 0.5580 \\
+		\hline
+		4 & 0.5625 \\
+		\hline
+		5 & 0.5714 \\
+		\hline
+		6 & 0.5625 \\
+		\hline
+	\end{tabular}
+\end{table}
+
+表\ref{ber5_size},\ref{ber5_hp}より，spaCyの結果と比べると精度が5\%以上良くなっていることがわかる。しかし、5値分類ではspaCyと同様に思うような結果が得られなかった。
+
+\begin{table}[H]
+	\centering
+	\caption{テストデータと訓練データの割合によるモデルの精度の変化(3値分類)\\
+			train\_test\_split(random\_state=1),forest(max\_depth=None,random\_state=1)}
+	\label{ber3_size}
+	\begin{tabular}{|c|c|}
+		\hline
+		test\_size(割合) & 精度\\
+		\hline
+		\hline
+		0.3 & 0.7976 \\
+		\hline
+		0.4 & 0.7991 \\
+		\hline
+		0.5 & 0.7893 \\
+		\hline
+	\end{tabular}
+\end{table}
+
+
+\begin{table}[H]
+	\centering
+	\caption{ランダムフォレストのハイパーパラメータ(深さの最大値)の変化に対するモデルの精度の変化(3値分類)\\
+train\_test\_split(test\_size=0.4, random\_state=1),forest(random\_state=1)}
+	\label{ber3_hp}
+	\begin{tabular}{|c|c|}
+		\hline
+		max\_depth & 精度\\
+		\hline
+		\hline
+		None(default) & 0.7991 \\
+		\hline
+		3 & 0.7857 \\
+		\hline
+		4 & 0.7857 \\
+		\hline
+		5 & 0.7946 \\
+		\hline
+		6 & 0.7901 \\
+		\hline
+	\end{tabular}
+\end{table}
+
+
+
+
 
 \section{考察}
+表より、5値分類よりラベル数を少なくした3値分類の方が認識率が高くなっていることがわかる。これは、ラベル間の特徴の違いが曖昧になっていたことが原因として考えられる。例えば５値分類の場合、評価基準の1と2はどちらも怪しいレビュー(サクラレビュー)であることを示しているが、その間の区別がつきにくく、認識率の低下に影響していると考えられる。
 
-\section{自己評価や振り返り}
+今回のデータセットを作成するときにサクラレビューの基準として、単語ではなく文脈や流れなどに着目して判定を行った。spaCyは固有表現に重きを置いている。逆にBERTの特徴は、Transformerという構造が組み込まれており、その構造により文頭と文末の双方向から学習を行うので文脈を読むというような形になっている。ということより、spaCyよりBERTの方が精度が高くなったと考えられる。
+
+\section{役割}
+\begin{table}[H]
+	\centering
+	\label{role}
+	\begin{tabular}{c|l}
+		195702D 奥間涼 & サクラレビューのある商品のURL収集、レビューの評価\\
+		195748B 徳里 光陽 & スクレイピングプログラムの作成。\\
+		195761K 塩月 流星 & サクラレビューのある商品のURL収集、レビューの評価\\
+		195769E 佐藤 和周 & spacyによるベクトル化、ランダムフォレストを用いた機械学習\\
+		195770J 栗原 瑠威 & BERTによるベクトル化、ランダムフォレストを用いた機械学習\\
+	\end{tabular}
+\end{table}
+
+\section{振り返り}
+スクレイピングのコードの完成が早く、レビューはすぐに多数集めることができた。だが、ラベル付けに時間がかかってしまった。
+
+ラベル付け後は、各自が役割を見つけて情報も共有しながらうまく進めることができたと思います。
+
+改善点として、最初は作業の役割分担などをせずに、各自で進めていた部分があるので、最初から役割をはっきり決めていたら作業効率を上げることができたと考えます。
 
 \section{時間の都合上省いた項目}
+いろんな商品のデータセットを用意
 
-
+他の機械学習の手法との比較
 
 \begin{thebibliography}{9}
-\bibitem{ki}ジコログ, 初心者でも簡単にできるSeleniumのインストール[Python]\\
- \url{https://self-development.info/初心者でも簡単にできるseleniumのインストール【python】/}, \\参照2021-10-26.
- \bibitem{C4.5}sakura-checker, サクラチェッカー,\\
- \url{https://sakura-checker.jp}, \\参照2021-11-09.
-  \bibitem{word2vec}Kazuyoshi Sato, Word2Vec+RandomForestで笑点の回答者ともらえる座布団の枚数を予測する,\\
- \url{https://qiita.com/WhitePepperKS/items/ef9ab61bd921a5fb7085}, \\参照2021-12-14.
-\bibitem{bert}ENOKI - AIを活用した無人チャットボットのプラットフォームを提供, BERTを使用した文章ベクトル作成,\\
- \url{https://www.enoki.enoki-inc.co.jp/tech-6/}, \\参照2021-12-21.
+\bibitem{1}]"GiNZA - Japanese NLP Library"\\
+ \url{https://megagonlabs.github.io/ginza/}
+ \bibitem{2}]"スクレイピング禁止のAmazonからレビューを抜き出す"\\
+ \url{https://self-development.info/スクレイピング禁止のamazonからレビューを抜き出す/}
+ \bibitem{3}"サクラチェッカー"\\
+ \url{https://sakura-checker.jp/}
+\bibitem{4}"データ科学便覧"\\
+ \url{https://data-science.gr.jp/implementation/iml_sklearn_random_forest.html}
+\bibitem{5}"Amazon激怒？中国企業アカウントを凍結　サクラレビュー対策に本腰か"\\
+ \url{https://news.livedoor.com/article/detail/20667140/}
+\bibitem{6}"初心者でも簡単にできるSeleniumのインストール【Python】"\\
+ \url{https://self-development.info/初心者でも簡単にできるseleniumのインストール【python】/}
+\bibitem{7}"BERT with SentencePiece を日本語 Wikipedia で学習してモデルを公開しました"\\
+ \url{https://yoheikikuta.github.io/bert-japanese/}
 
 \end{thebibliography}
 \end{document}
